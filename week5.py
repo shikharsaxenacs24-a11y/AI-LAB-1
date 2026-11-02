@@ -1,0 +1,127 @@
+
+# USN_Week5_SimulatedAnnealing_8_Queens.py
+# Implementation of Simulated Annealing for 8-Queens Problem
+
+import random
+import math
+
+N = 8
+
+# Function to calculate the cost
+def calculate_cost(state):
+    cost = 0
+
+    for i in range(N):
+        for j in range(i + 1, N):
+
+            # Check same row
+            if state[i] == state[j]:
+                cost += 1
+
+            # Check same diagonal
+            elif abs(state[i] - state[j]) == abs(i - j):
+                cost += 1
+
+    return cost
+
+
+# Function to display chessboard
+def display_board(state):
+    for row in range(N):
+        for col in range(N):
+            if state[col] == row:
+                print(" Q ", end="")
+            else:
+                print(" . ", end="")
+        print()
+    print()
+
+
+# Function to generate neighboring state
+def generate_neighbor(state):
+    new_state = state.copy()
+
+    col = random.randint(0, N - 1)
+    new_row = random.randint(0, N - 1)
+
+    while new_row == new_state[col]:
+        new_row = random.randint(0, N - 1)
+
+    new_state[col] = new_row
+
+    return new_state
+
+
+# Simulated Annealing Algorithm
+def simulated_annealing():
+
+    # Generate random initial state
+    current_state = [random.randint(0, N - 1) for _ in range(N)]
+
+    current_cost = calculate_cost(current_state)
+
+    temperature = 1000
+    cooling_rate = 0.995
+    minimum_temperature = 0.1
+
+    iteration = 0
+
+    print("Initial State:", current_state)
+    print("Initial Cost:", current_cost)
+    display_board(current_state)
+
+    while temperature > minimum_temperature:
+
+        # Check goal condition
+        if current_cost == 0:
+            print("Goal State Reached!")
+            break
+
+        # Generate neighbor
+        neighbor = generate_neighbor(current_state)
+
+        neighbor_cost = calculate_cost(neighbor)
+
+        # Calculate cost difference
+        delta = neighbor_cost - current_cost
+
+        # Accept better solution
+        if delta < 0:
+            current_state = neighbor
+            current_cost = neighbor_cost
+
+        # Accept worse solution based on probability
+        else:
+            probability = math.exp(-delta / temperature)
+
+            if random.random() < probability:
+                current_state = neighbor
+                current_cost = neighbor_cost
+
+        # Reduce temperature
+        temperature = temperature * cooling_rate
+
+        iteration += 1
+
+        if iteration % 100 == 0:
+            print("Iteration:", iteration)
+            print("Temperature:", round(temperature, 2))
+            print("Cost:", current_cost)
+
+    # Display final result
+    print("\nFinal Result")
+    print("Iterations:", iteration)
+    print("Final State:", current_state)
+    print("Final Cost:", current_cost)
+
+    if current_cost == 0:
+        print("8-Queens Solution Found!")
+    else:
+        print("Solution Not Found. Try Again.")
+
+    display_board(current_state)
+
+
+# Main function
+if __name__ == "__main__":
+    simulated_annealing()
